@@ -39,21 +39,21 @@ android.permissions =
     
 android.api = 33
 android.minapi = 21
-android.sdk = 33
+#android.sdk = 33
 android.ndk = 25.1.8937393
 android.ndk_api = 21
 android.gradle_dependencies = 'com.google.android.material:material:1.8.0'
 
 # Packaging
 android.accept_sdk_license = True
-android.arch = arm64-v8a
+android.archs = arm64-v8a
 
 # Icons and resources
 icon.fg = %(source.dir)s/data/icon.png
 icon.adaptive_icon.foreground = %(source.dir)s/data/icon.png
 icon.adaptive_icon.background = %(source.dir)s/data/icon_bg.png
 presplash.fg = %(source.dir)s/data/presplash.png
-presplash.color = #FFFFFF
+#presplash.color = #FFFFFF
 
 # Build settings
 android.private_storage = True
