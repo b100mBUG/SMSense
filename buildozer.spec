@@ -5,24 +5,35 @@ package.domain = org.test
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,json,ttf
 version = 1.0
+
+# Added openssl (crucial for 'requests') and pinned cython for stability
 requirements = 
     python3,
     kivy==2.3.1,
+    kivymd@https://github.com/kivymd/KivyMD/archive/master.zip,
     asynckivy,
     asyncgui,
     materialyoucolor,
     certifi,
-    kivymd@https://github.com/kivymd/KivyMD/archive/master.zip,
-    android,
-    plyer,
+    openssl,
     requests,
     urllib3,
     charset-normalizer,
-    idna
+    idna,
+    android,
+    plyer
+
 orientation = portrait
 fullscreen = 0
 
-# Android specific
+# --- Android Specific ---
+# API 34 is the standard for 2026 play store targets
+android.api = 34
+android.minapi = 21
+# Using '25c' is way more stable than the full build number
+android.ndk = 25c
+android.ndk_api = 21
+
 android.permissions = 
     INTERNET,
     READ_SMS,
@@ -32,38 +43,21 @@ android.permissions =
     WRITE_EXTERNAL_STORAGE,
     READ_EXTERNAL_STORAGE,
     ACCESS_NETWORK_STATE,
-    ACCESS_WIFI_STATE,
     VIBRATE,
     RECORD_AUDIO,
     CAMERA
-    
-android.api = 33
-android.minapi = 21
-#android.sdk = 33
-android.ndk = 25.1.8937393
-android.ndk_api = 21
-android.gradle_dependencies = 'com.google.android.material:material:1.8.0'
 
-# Packaging
-android.accept_sdk_license = True
-android.archs = arm64-v8a
-
-# Icons and resources
-icon.fg = %(source.dir)s/data/icon.png
-icon.adaptive_icon.foreground = %(source.dir)s/data/icon.png
-icon.adaptive_icon.background = %(source.dir)s/data/icon_bg.png
-presplash.fg = %(source.dir)s/data/presplash.png
-#presplash.color = #FFFFFF
-
-# Build settings
-android.private_storage = True
-android.wakelock = True
-android.allow_backup = True
+# Modern Gradle fix
+android.gradle_dependencies = 'com.google.android.material:material:1.9.0'
 android.enable_androidx = True
-p4a.branch = develop
+android.accept_sdk_license = True
+android.archs = arm64-v8a, armeabi-v7a
 
-# Presplash settings
+# --- Visuals ---
+icon.filename = %(source.dir)s/data/icon.png
 presplash.filename = %(source.dir)s/data/presplash.png
 
-# Logging
+# --- Build Settings ---
+android.allow_backup = True
+p4a.branch = develop
 log_level = 2
