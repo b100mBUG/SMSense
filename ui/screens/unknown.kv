@@ -1,0 +1,52 @@
+<UnknownScreen>:
+    name: "unknown"
+    MDBoxLayout:
+        orientation: "vertical"
+        spacing: dp(10)
+        padding: dp(10)
+        theme_bg_color: "Custom"
+        md_bg_color: root.theme_cls.backgroundColor
+        MDTopAppBar:
+            type: "medium"
+            MDTopAppBarLeadingButtonContainer:
+                MDActionTopAppBarButton:
+                    icon: "arrow-left"
+                    theme_icon_color: "Custom"
+                    icon_color: "teal"
+                    on_release: root.manager.current = "home"
+            MDTopAppBarTitle:
+                text: "Unknown"
+                theme_text_color: "Custom"
+                text_color: "teal"
+        MDDivider:
+            color: "teal"
+        MDBoxLayout:
+            spacing: dp(10)
+            padding: dp(10)
+            size_hint_y: None
+            height: dp(60)
+            MDTextField:
+                id: search_field
+                mode: "filled"
+                pos_hint: {"center_y":.5}
+                MDTextFieldHintText:
+                    text: "Find..."
+                MDTextFieldHelperText:
+                    text: "Try entering sender name"
+                    theme_text_color: "Custom"
+                    text_color: "teal"
+        RecycleView:
+            id: rec_view
+            scroll_type: ["bars", "content"]
+            bar_width: 10
+            size_hint: 1, 1
+            RecycleBoxLayout:
+                id: rec_box
+                default_size: None, dp(50)
+                default_size_hint: 1, None
+                orientation: "vertical"
+                padding: dp(10)
+                spacing: dp(10)
+                size_hint_y: None
+                height: self.minimum_height
+                

@@ -1,0 +1,176 @@
+<HomeScreen>:
+    name: "home"
+    MDBoxLayout:
+        orientation: "vertical"
+        spacing: dp(10)
+        padding: dp(10)
+        theme_bg_color: "Custom"
+        md_bg_color: root.theme_cls.backgroundColor
+        MDLabel:
+            text: "SMSense"
+            bold: True
+            theme_text_color: "Custom"
+            text_color: "teal"
+            adaptive_height: True
+            theme_font_size: "Custom"
+            font_size: sp(30)
+        MDDivider:
+            color: "teal"
+        MDLabel:
+            text: "[i]Folders[/i]"
+            theme_text_color: "Custom"
+            text_color: "teal"
+            adaptive_height: True
+            theme_font_size: "Custom"
+            font_size: sp(18)
+            markup: True
+        MDGridLayout:
+            cols: 3
+            spacing: dp(10)
+            adaptive_height: True
+            MDCard:
+                size_hint: None, None
+                height: dp(150)
+                style: "outlined"
+                width: dp(150)
+                orientation: "vertical"
+                on_release: root.manager.current = "focused"
+                padding: dp(5)
+                MDBoxLayout:
+                    FitImage:
+                        source: f"{root.image_path}/focused_folder.png"
+                        allow_stretch: True
+                        keep_ratio: True
+                MDLabel:
+                    id: focused_folder_label
+                    text: "Focused"
+                    halign: "center"
+                    theme_text_color: "Custom"
+                    text_color: "teal"
+                    adaptive_height: True
+                    theme_font_size: "Custom"
+                    font_size: sp(18)
+            MDCard:
+                size_hint: None, None
+                height: dp(150)
+                width: dp(150)
+                style: "outlined"
+                orientation: "vertical"
+                padding: dp(5)
+                on_release: root.manager.current = "otp"
+                MDBoxLayout:
+                    FitImage:
+                        source: f"{root.image_path}/otp_folder.png"
+                        allow_stretch: True
+                        keep_ratio: True
+                MDLabel:
+                    id: otp_folder_label
+                    text: "OTP"
+                    halign: "center"
+                    theme_text_color: "Custom"
+                    text_color: "teal"
+                    adaptive_height: True
+                    theme_font_size: "Custom"
+                    font_size: sp(18)
+            MDCard:
+                size_hint: None, None
+                height: dp(150)
+                width: dp(150)
+                style: "outlined"
+                orientation: "vertical"
+                padding: dp(5)
+                on_release: root.manager.current = "promo"
+                MDBoxLayout:
+                    FitImage:
+                        source: f"{root.image_path}/promotion_folder.png"
+                        allow_stretch: True
+                        keep_ratio: True
+                MDLabel:
+                    id: promotion_folder_label
+                    text: "Promotion"
+                    halign: "center"
+                    theme_text_color: "Custom"
+                    text_color: "teal"
+                    adaptive_height: True
+                    theme_font_size: "Custom"
+                    font_size: sp(18)
+            MDCard:
+                size_hint: None, None
+                height: dp(150)
+                width: dp(150)
+                style: "outlined"
+                orientation: "vertical"
+                padding: dp(5)
+                on_release: root.manager.current = "spam"
+                MDBoxLayout:
+                    FitImage:
+                        source: f"{root.image_path}/spam_folder.png"
+                        allow_stretch: True
+                        keep_ratio: True
+                MDLabel:
+                    id: spam_folder_label
+                    text: "Spam"
+                    halign: "center"
+                    theme_text_color: "Custom"
+                    text_color: "teal"
+                    adaptive_height: True
+                    theme_font_size: "Custom"
+                    font_size: sp(18)
+            MDCard:
+                size_hint: None, None
+                height: dp(150)
+                width: dp(150)
+                style: "outlined"
+                orientation: "vertical"
+                padding: dp(5)
+                on_release: root.manager.current = "unknown"
+                MDBoxLayout:
+                    FitImage:
+                        source: f"{root.image_path}/unknown_folder.png"
+                        allow_stretch: True
+                        keep_ratio: True
+                MDLabel:
+                    id: unknown_folder_label
+                    text: "Unknown"
+                    halign: "center"
+                    theme_text_color: "Custom"
+                    text_color: "teal"
+                    adaptive_height: True
+                    theme_font_size: "Custom"
+                    font_size: sp(18)
+            MDCard:
+                size_hint: None, None
+                height: dp(150)
+                width: dp(150)
+                style: "outlined"
+                orientation: "vertical"
+                padding: dp(5)
+                
+                MDBoxLayout:
+                    FitImage:
+                        source: f"{root.image_path}/new_folder.png"
+                        allow_stretch: True
+                        keep_ratio: True
+                MDLabel:
+                    id: new_folder_label
+                    text: "New"
+                    halign: "center"
+                    theme_text_color: "Custom"
+                    text_color: "teal"
+                    adaptive_height: True
+                    theme_font_size: "Custom"
+                    font_size: sp(18)
+        MDDivider:
+            color: "teal"
+        MDLabel:
+            text: "[i]Frequent contacts[/i]"
+            theme_text_color: "Custom"
+            text_color: "teal"
+            adaptive_height: True
+            theme_font_size: "Custom"
+            font_size: sp(18)
+            markup: True
+        MDScrollView:
+            MDGridLayout:
+                cols: 1
+                adaptive_height: True
