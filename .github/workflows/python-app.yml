@@ -1,163 +1,58 @@
-name: Build APK with SMS/Internet Access
+name: Build APK
 
 on:
   push:
-    branches: [ main, master ]
-  pull_request:
     branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 180
-    
+    runs-on: ubuntu-22.04 # Stable for build tools
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Set up Python 3.11
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-        
-    - name: Install essential system dependencies
+
+    - name: Install system dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y \
-            build-essential \
-            git \
-            python3-pip \
-            python3-dev \
-            libffi-dev \
-            libssl-dev \
-            libjpeg-dev \
-            libz-dev \
-            openjdk-17-jdk \
-            unzip \
-            zip \
-            ccache \
-            cmake \
-            ninja-build \
-            pkg-config \
-            libsdl2-dev \
-            libsdl2-image-dev \
-            libsdl2-mixer-dev \
-            libsdl2-ttf-dev \
-            libgstreamer1.0-dev \
-            gstreamer1.0-plugins-base \
-            gstreamer1.0-plugins-good \
-            libmpg123-dev \
-            libportmidi-dev \
-            swig \
-            wget \
-            curl \
-            libxml2-dev \
-            libxslt-dev \
-            libfreetype6-dev \
-            libharfbuzz-dev \
-            libgl1-mesa-dev \
-            libegl1-mesa-dev \
-            libgles2-mesa-dev \
-            libasound2-dev \
-            libpulse-dev \
-            libdbus-1-dev \
-            libudev-dev
-            
-    - name: Set up Android SDK
+          build-essential git ffmpeg libsdl2-dev libsdl2-image-dev \
+          libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev \
+          libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev \
+          libgstreamer1.0-gstreamer-lite-dev libgstreamer1.0-dev \
+          gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
+          autoconf automake libtool pkg-config libffi-dev libssl-dev \
+          openjdk-17-jdk
+
+    - name: Install Buildozer & Cython
       run: |
-        # Download Android Command Line Tools
-        wget -q https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip
-        mkdir -p android-sdk/cmdline-tools
-        unzip -q commandlinetools-linux-10406996_latest.zip -d android-sdk/cmdline-tools
-        mv android-sdk/cmdline-tools/cmdline-tools android-sdk/cmdline-tools/latest
-        
-        # Set environment variables
-        echo "ANDROID_SDK_ROOT=${{ github.workspace }}/android-sdk" >> $GITHUB_ENV
-        echo "ANDROID_HOME=${{ github.workspace }}/android-sdk" >> $GITHUB_ENV
-        echo "${{ github.workspace }}/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
-        
-    - name: Accept Android licenses
-      run: |
-        yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses || true
-        
-    - name: Install Android SDK components
-      run: |
-        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
-          "platforms;android-33" \
-          "build-tools;33.0.0" \
-          "platform-tools" \
-          "ndk;25.1.8937393" \
-          "cmdline-tools;latest"
-          
-    - name: Cache Buildozer dependencies
+        pip install --upgrade pip
+        pip install "buildozer>=1.5.0" "cython<3.0.0"
+
+    - name: Cache Buildozer
       uses: actions/cache@v4
       with:
-        path: |
-          ~/.buildozer
-          .buildozer
-          ~/.android
-          android-sdk
+        path: .buildozer
         key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
-        restore-keys: |
-          ${{ runner.os }}-buildozer-
-          
-    - name: Install Buildozer only
+
+    - name: Build with Buildozer
       run: |
-        python -m pip install --upgrade pip setuptools wheel
-        pip install buildozer==1.5.0 cython==0.29.36
-        
-        # DO NOT install Python requirements here - let Buildozer handle them
-        echo "Skipping requirements.txt installation - Buildozer will handle dependencies"
-        
-    - name: Show current configuration
-      run: |
-        echo "=== Repository structure ==="
-        ls -la
-        echo -e "\n=== Your buildozer.spec (requirements section) ==="
-        grep -A5 "requirements =" buildozer.spec || echo "No requirements found"
-        
-    - name: Clean and build APK
-      run: |
-        echo "Starting APK build..."
-        
-        # Optional: Clean previous builds if needed
-        # buildozer android clean 2>/dev/null || true
-        
-        # Build with more memory
-        export GRADLE_OPTS="-Xmx4g -XX:MaxMetaspaceSize=1g"
-        
-        # Build the APK - let Buildozer handle all dependencies
-        timeout 160m buildozer -v android debug
-        
-    - name: Check for APK files
-      run: |
-        echo "Searching for APK files..."
-        find . -name "*.apk" -type f 2>/dev/null || echo "No APK files found"
-        
-        if [ -d "bin" ]; then
-          echo "Contents of bin directory:"
-          ls -la bin/ 2>/dev/null || echo "bin directory empty"
-        fi
-        
-    - name: Upload APK artifacts
-      if: success()
+        # Fix for a common Buildozer/Ubuntu permission bug
+        export LC_ALL=en_US.UTF-8
+        export LANG=en_US.UTF-8
+        # Start the build
+        buildozer -v android debug
+      env:
+        # Increase memory for Java/Gradle
+        GRADLE_OPTS: "-Xmx4g"
+
+    - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: apk-files
-        path: |
-          bin/*.apk
-          bin/*.aab
-        if-no-files-found: warn
-        retention-days: 7
-        
-    - name: Upload build logs
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-logs
-        path: |
-          .buildozer/*.log
-          .buildozer/android/platform/*.log
-        if-no-files-found: ignore
-        retention-days: 3
+        name: SMSense-Debug-APK
+        path: bin/*.apk
