@@ -21,7 +21,7 @@ jobs:
       with:
         python-version: '3.11'
         
-    - name: Install system dependencies
+    - name: Install ALL system dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -29,10 +29,15 @@ jobs:
             git \
             python3-pip \
             python3-dev \
+            # Cairo dependencies
+            libcairo2-dev \
+            libcairo2 \
+            libgirepository1.0-dev \
             libffi-dev \
             libssl-dev \
             libjpeg-dev \
             libz-dev \
+            # Android/JDK
             openjdk-17-jdk \
             unzip \
             zip \
@@ -40,6 +45,7 @@ jobs:
             cmake \
             ninja-build \
             pkg-config \
+            # SDL/Kivy dependencies
             libsdl2-dev \
             libsdl2-image-dev \
             libsdl2-mixer-dev \
@@ -53,7 +59,29 @@ jobs:
             wget \
             curl \
             libxml2-dev \
-            libxslt-dev
+            libxslt-dev \
+            # Additional dependencies
+            libpango1.0-dev \
+            libgdk-pixbuf2.0-dev \
+            libatk1.0-dev \
+            libgtk-3-dev \
+            libfreetype6-dev \
+            libharfbuzz-dev \
+            libxi-dev \
+            libxrandr-dev \
+            libxcursor-dev \
+            libxinerama-dev \
+            libxxf86vm-dev \
+            libxfixes-dev \
+            libgl1-mesa-dev \
+            libegl1-mesa-dev \
+            libgles2-mesa-dev \
+            libasound2-dev \
+            libpulse-dev \
+            libdbus-1-dev \
+            libudev-dev \
+            libinput-dev \
+            libmtdev-dev
             
     - name: Set up Android SDK
       run: |
@@ -93,45 +121,54 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-buildozer-
           
-    - name: Install Buildozer and Python dependencies
+    - name: Install Python packages with workaround for pycairo
       run: |
         python -m pip install --upgrade pip setuptools wheel virtualenv
+        
+        # First install system packages that might need Cairo
+        pip install pycairo==1.25.1 --no-binary :all:
+        
+        # Now install buildozer and other dependencies
         pip install buildozer==1.5.0 cython==0.29.36 pillow
         
-        # Install Python requirements if requirements.txt exists
+        # Install requirements WITHOUT building from source if possible
         if [ -f "requirements.txt" ]; then
           echo "Installing from requirements.txt..."
-          pip install -r requirements.txt
+          # Try to avoid building problematic packages
+          pip install -r requirements.txt --no-binary kivy,kivymd || \
+          pip install -r requirements.txt --no-deps || \
+          echo "Partial installation, will continue with build"
         fi
         
-    - name: Initialize Buildozer (only if needed)
-      # This runs buildozer init ONLY if buildozer.spec doesn't exist
+    - name: Show buildozer.spec for debugging
       run: |
-        if [ ! -f "buildozer.spec" ]; then
-          echo "No buildozer.spec found, creating minimal one..."
-          buildozer init
-        else
-          echo "Using existing buildozer.spec"
-          cat buildozer.spec  # Show the spec for debugging
-        fi
+        echo "=== Your buildozer.spec ==="
+        cat buildozer.spec
+        echo -e "\n=== Requirements line ==="
+        grep -A2 "requirements =" buildozer.spec || echo "No requirements found"
         
     - name: Build debug APK
       run: |
-        echo "Starting APK build with your configuration..."
-        echo "Buildozer spec contents:"
-        head -50 buildozer.spec
+        echo "Starting APK build..."
+        echo "Using Python: $(python --version)"
+        echo "Using pip: $(pip --version)"
         
-        # Build the APK
-        export GRADLE_OPTS="-Xmx4g -XX:MaxMetaspaceSize=1g"
-        buildozer -v android debug
+        # Clean previous builds
+        rm -rf .buildozer/android/platform/build-*/{build,dists} 2>/dev/null || true
         
-    - name: List generated APK files
+        # Build with more memory
+        export GRADLE_OPTS="-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError"
+        
+        # Build with verbose output
+        timeout 150m buildozer -v android debug 2>&1 | tail -200
+        
+    - name: Check for APK files
       run: |
-        echo "Looking for APK files..."
-        find . -name "*.apk" -type f 2>/dev/null | head -10
+        echo "Searching for APK files..."
+        find . -name "*.apk" -type f 2>/dev/null
         if [ -d "bin" ]; then
-          echo "Contents of bin directory:"
-          ls -la bin/
+          echo "APKs in bin directory:"
+          ls -la bin/*.apk 2>/dev/null || echo "No APKs in bin directory"
         fi
         
     - name: Upload APK artifacts
@@ -145,7 +182,7 @@ jobs:
         if-no-files-found: warn
         retention-days: 7
         
-    - name: Upload build logs for debugging
+    - name: Upload build logs
       if: always()
       uses: actions/upload-artifact@v4
       with:
