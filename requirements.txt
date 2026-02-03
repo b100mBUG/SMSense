@@ -1,0 +1,7 @@
+kivy==2.3.1
+python3==3.11.4
+kivymd@https://github.com/kivymd/KivyMD/archive/master.zip
+certifi
+asyncgui
+asynckivy
+materialyoucolor
